@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style.css">
+    <title>Bakyt</title>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <div class="nav-logo">Bakyt Erkinkyzy</div>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="login" class="nav-link">Log in</a>
+                    <a href="register" class="nav-link">Sign up</a>
+                </div>
+            </nav>
+            <div class="header-inner">
+                <div class="header-title">Sign up</div>
+                <div class="header-subtitle">Here you can create account</div>
+                <div class="header-action">
+                    <form class="header-form" id="registrationForm" action="/register" method="POST">
+                        <div class="wrapper">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" name="username" placeholder="Username" required>
+                        </div>
+                        
+                        <div class="wrapper">
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" placeholder="Email" required>
+                        </div>
+                
+                        <div class="wrapper">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" placeholder="Password" required>
+                        </div>
+                        
+                        <div class="wrapper">
+                            <label for="confirmPassword">Confirm Password:</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+                        </div>
+                
+                        <input type="button" value="Register" onclick="postData()">
+                        <label for="result" id="result"></label>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        /**
+        * Asynchronous function to send user registration data to the server.
+        */
+        async function postData() {
+            // Get the values of username, email, password, and confirmPassword from HTML elements.
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Get the result element where the server response will be displayed.
+            const result = document.getElementById('result');
+
+            // Check if the entered passwords match.
+            if (password !== confirmPassword) {
+                result.innerHTML = 'Passwords do not match';
+                return; // Exit the function if passwords don't match.
+            }
+
+            // Prepare the data to be sent in the request body.
+            const dataToSend = {
+                username,
+                email,
+                password
+            };
+
+            try {
+                // Send a POST request to the "/register" endpoint with the user registration data.
+                const response = await fetch("/register", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dataToSend)
+                });
+
+                // Parse the JSON response from the server.
+                const data = await response.json();
+
+                // Display the server message in the result element.
+                result.innerHTML = data.message;
+            } catch (error) {
+                // Handle any errors that occur during the fetch operation.
+                console.error('Error:', error);
+            }
+        }
+
+    </script>
+</body>
+</html>
