@@ -5,10 +5,10 @@ const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const pool = new Pool({
     host: "localhost",
-    user: "postgres",
+    user: "Your user for db",
     port: 5432,
-    password: "Qazxsew05",
-    database: "backend1"
+    password: "Your password",
+    database: "Your database name"
 });
 
 const app = express();
