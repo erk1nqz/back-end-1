@@ -2,16 +2,14 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 
-const { Client } = require('pg');
-const client = new Client({
+const { Pool } = require('pg');
+const pool = new Pool({
     host: "localhost",
     user: "postgres",
     port: 5432,
-    password: "somePassword",
-    database: "backAuth"
+    password: "Qazxsew05",
+    database: "backend1"
 });
-
-client.connect();
 
 const app = express();
 const port = 3000;
@@ -35,8 +33,8 @@ app.get('/login', (req, res) => {
 // Route: Handle login POST request
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
+    const client = await pool.connect();
     try {
-        // Query the database to check if the provided credentials are valid
         const result = await client.query('SELECT * FROM users WHERE username = $1 AND password = $2', [username, password]);
 
         if (result.rows.length > 0) {
@@ -45,9 +43,10 @@ app.post('/login', async (req, res) => {
             res.json({ success: false, message: 'Invalid username or password.' });
         }
     } catch (error) {
-        // Handle database query errors
         console.error('Error executing query:', error);
         res.status(500).json({ success: false, message: 'Internal server error.' });
+    } finally {
+        client.release(); // Release the connection back to the pool
     }
 });
 
@@ -57,25 +56,27 @@ app.get('/register', (req, res) => {
 });
 
 // Route: Handle registration POST request
-app.post('/register', (req, res) => {
+app.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     // Insert user registration data into the database
-    client.query(`INSERT INTO users (userName, email, password) VALUES ('${username}', '${email}', '${password}')`, (err, result) => {
-        if (err) {
-            res.status(500).json({
-                "success": false,
-                "message": "Something went wrong. Please try again."
-            });
-        }
-        // Close the database connection
-        client.end();
-    });
+    const client = await pool.connect();
 
-    res.status(200).json({
-        "status": "success",
-        "message": `You have successfully registered an account.`
-    });
+    try {
+        await client.query('INSERT INTO users (userName, email, password) VALUES ($1, $2, $3)', [username, email, password]);
+        res.status(200).json({
+            "status": "success",
+            "message": `You have successfully registered an account.`
+        });
+    } catch (error) {
+        console.error('Error executing query:', error);
+        res.status(500).json({
+            "success": false,
+            "message": "Something went wrong. Please try again."
+        });
+    } finally {
+        client.release();
+    }
 });
 
 // Start the server
